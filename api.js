@@ -1,5 +1,9 @@
 /* eslint-disable prettier/prettier */
 // api.js
+//web-app 261015350901-6q8aj2fbb82eutjmugdu9lkb91hnnel0.apps.googleusercontent.com
+// ios 261015350901-vstjf25m9r7c8ef8k3rqocbtelae949a.apps.googleusercontent.com
+// android 261015350901-p80gpfnhi2kfbu93o8dab43ks88c7ji2.apps.googleusercontent.com
+
 import axios from 'axios';
 import { BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';

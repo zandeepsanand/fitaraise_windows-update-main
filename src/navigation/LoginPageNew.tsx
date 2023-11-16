@@ -30,6 +30,10 @@ import * as Animatable from 'react-native-animatable';
 import Lottie from 'lottie-react-native';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {Linking} from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+
+WebBrowser.maybeCompleteAuthSession();
 
 const isAndroid = Platform.OS === 'android';
 interface IRegistration {
@@ -50,6 +54,57 @@ interface IRegistrationValidation {
 const LoginScreenNew = ({navigation, route}) => {
   const {country} = route.params;
   console.log(country);
+  const [userInfo, setUserInfo] = React.useState(null);
+
+  // const [request ,response , promptAsync] = Google.useAuthRequest({
+  //   androidClientId:
+  //     '261015350901-p80gpfnhi2kfbu93o8dab43ks88c7ji2.apps.googleusercontent.com',
+  //   iosClientId:
+  //     '261015350901-vstjf25m9r7c8ef8k3rqocbtelae949a.apps.googleusercontent.com',
+  //     scopes: ['profile', 'email'],
+  // });
+  // const [request, response, promptAsync] = Google.useAuthRequest({
+  //   clientId: '261015350901-p80gpfnhi2kfbu93o8dab43ks88c7ji2.apps.googleusercontent.com', // Use this property instead of expoClientId
+  //   scopes: ['profile', 'email'],
+  // });
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { authentication } = response;
+      // Handle the authentication response, e.g., call your backend with the token
+      console.log('Authentication response:', authentication);
+    }
+  }, [response]);
+
+  const handleSignIn = async () => {
+    try {
+      const result = await promptAsync();
+      if (result?.type !== 'success') {
+        // Handle the case where the user cancels or there's an error
+        Alert.alert('Authentication failed');
+      }
+    } catch (error) {
+      console.error('Error in Google authentication:', error);
+    }
+  };
+
+  // const signInWithGoogleAsync = async () => {
+  //   try {
+  //     const result = await Google.logInAsync({
+  //       androidClientId: '261015350901-p80gpfnhi2kfbu93o8dab43ks88c7ji2.apps.googleusercontent.com',
+  //       iosClientId: '261015350901-vstjf25m9r7c8ef8k3rqocbtelae949a.apps.googleusercontent.com',
+  //       scopes: ['profile', 'email'],
+  //     });
+
+  //     if (result.type === 'success') {
+  //       console.log('Google authentication successful', result.user);
+  //       // Handle the successful login, e.g., set user state, navigate to another screen, etc.
+  //     } else {
+  //       console.log('Google authentication cancelled or failed');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error in Google authentication', error);
+  //   }
+  // };
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [email, setEmail] = useState('');
@@ -773,7 +828,7 @@ Share to your friends
                   </Block>
                   <Block padding={10} margin={10} flex={0} height={100}>
                     <Block row center justify="space-evenly">
-                      <Button
+                      {/* <Button
                         outlined
                         gray
                         shadow={!isAndroid}
@@ -784,8 +839,8 @@ Share to your friends
                           width={sizes.m}
                           color={colors.icon}
                         />
-                      </Button>
-                      <Button
+                      </Button> */}
+                      {/* <Button
                         outlined
                         gray
                         shadow={!isAndroid}
@@ -796,12 +851,14 @@ Share to your friends
                           width={sizes.m}
                           color={colors.icon}
                         />
-                      </Button>
+                      </Button> */}
                       <Button
                         outlined
                         gray
                         shadow={!isAndroid}
-                        style={{justifyContent: 'center', alignSelf: 'center'}}>
+                        style={{justifyContent: 'center', alignSelf: 'center'}} 
+                        onPress={handleSignIn}
+                        >
                         <Image
                           source={assets.google}
                           height={sizes.m}
@@ -820,11 +877,7 @@ Share to your friends
                     }}>
                     <Text>New to the app?</Text>
                     <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate('login', {country})
-                        }
-                      
-                      >
+                      onPress={() => navigation.navigate('login', {country})}>
                       <Text
                         primary
                         bold
