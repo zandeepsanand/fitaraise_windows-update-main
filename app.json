@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "sandeep s anand",
+    "slug": "sandeep",
+    "description": "new proj",
+    "primaryColor": "#0ef896",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/fitter.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#fffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/7544a3cd-5c50-497d-8063-25bb9fc2ddf6"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "useNextNotificationsApi": true,
+      
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#fffff"
+      },
+      "package": "com.sandeepsanand.sandeep",
+      "permissions": [
+        "READ_SMS",
+        "RECEIVE_SMS"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7544a3cd-5c50-497d-8063-25bb9fc2ddf6"
+      }
+    },
+    "plugins": [
+      "expo-localization"
+    ],
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "owner": "sandeepsanand"
+  }
+}
