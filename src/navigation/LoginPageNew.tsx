@@ -22,7 +22,7 @@ import api, {setAuthToken} from '../../api';
 import {Block, Button, Image, Input, Text} from '../components';
 import {useTheme} from '../hooks';
 import InputField from '../components/inputField';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginContext, {loginSuccess} from '../hooks/LoginContext';
 import {StackActions} from '@react-navigation/native';
 import {Animated, Easing} from 'react-native';
@@ -32,6 +32,8 @@ import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {Linking} from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { makeRedirectUri } from 'expo-auth-session';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -54,7 +56,100 @@ interface IRegistrationValidation {
 const LoginScreenNew = ({navigation, route}) => {
   const {country} = route.params;
   console.log(country);
-  const [userInfo, setUserInfo] = React.useState(null);
+  const [token, setToken] = useState('');
+  const [userInfo, setUserInfo] = useState(null);
+
+  // const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+  //   clientId:"261015350901-bda4mpjomi1u2nnshanmfl8kmjdmnavr.apps.googleusercontent.com",
+  //   androidClientId: "261015350901-p80gpfnhi2kfbu93o8dab43ks88c7ji2.apps.googleusercontent.com",
+  //   iosClientId: "261015350901-vstjf25m9r7c8ef8k3rqocbtelae949a.apps.googleusercontent.com",
+  //   webClientId: "261015350901-vstjf25m9r7c8ef8k3rqocbtelae949a.apps.googleusercontent.com",
+
+  // });
+  const [request, response, promptAsync] = Google.useAuthRequest(
+    {
+      expoClientId:
+        '261015350901-bda4mpjomi1u2nnshanmfl8kmjdmnavr.apps.googleusercontent.com',
+      iosClientId:
+        '261015350901-vstjf25m9r7c8ef8k3rqocbtelae949a.apps.googleusercontent.com',
+      androidClientId:
+        '261015350901-p80gpfnhi2kfbu93o8dab43ks88c7ji2.apps.googleusercontent.com',
+      webClientId:
+        '261015350901-vstjf25m9r7c8ef8k3rqocbtelae949a.apps.googleusercontent.com',
+       
+    },
+    {
+      projectNameForProxy: '@sandeepsanand/sandeep',
+      
+    },
+    
+  );
+  useEffect(() => {
+    handleEffect();
+  }, [response, token]);
+
+  async function handleEffect() {
+    const user = await getLocalUser();
+    console.log('user', user);
+    if (!user) {
+      if (response?.type === 'success') {
+        // setToken(response.authentication.accessToken);
+        getUserInfo(response.authentication.accessToken);
+      }
+    } else {
+      setUserInfo(user);
+      console.log('loaded locally');
+    }
+  }
+  const signUpGoogleHandler = async () => {
+    const response = await promptAsync();
+    if (response.type === 'success') {
+      const {access_token} = response.params;
+      console.log('res params ', access_token);
+    }
+    console.log('test123');
+    const provider = new GoogleAuthProvider();
+    await signInWithRedirect(auth, provider);
+    getRedirectResult(auth)
+      .then((result) => {
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        const user = result.user;
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        const email = error.customData.email;
+        const credential = GoogleAuthProvider.credentialFromError(error);
+      });
+  };
+
+  const getLocalUser = async () => {
+    const data = await AsyncStorage.getItem('@user');
+    if (!data) return null;
+    return JSON.parse(data);
+  };
+
+  const getUserInfo = async (token) => {
+    if (!token) return;
+    try {
+      const response = await fetch(
+        'https://www.googleapis.com/userinfo/v2/me',
+        {
+          headers: {Authorization: `Bearer ${token}`},
+        },
+      );
+
+      const user = await response.json();
+      await AsyncStorage.setItem('@user', JSON.stringify(user));
+      setUserInfo(user);
+    } catch (error) {
+      // Add your own error handler here
+    }
+  };
+  // useEffect(() => {
+  //   handleEffect();
+  // }, [response, token]);
 
   // const [request ,response , promptAsync] = Google.useAuthRequest({
   //   androidClientId:
@@ -67,25 +162,25 @@ const LoginScreenNew = ({navigation, route}) => {
   //   clientId: '261015350901-p80gpfnhi2kfbu93o8dab43ks88c7ji2.apps.googleusercontent.com', // Use this property instead of expoClientId
   //   scopes: ['profile', 'email'],
   // });
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { authentication } = response;
-      // Handle the authentication response, e.g., call your backend with the token
-      console.log('Authentication response:', authentication);
-    }
-  }, [response]);
+  // useEffect(() => {
+  //   if (response?.type === 'success') {
+  //     const { authentication } = response;
+  //     // Handle the authentication response, e.g., call your backend with the token
+  //     console.log('Authentication response:', authentication);
+  //   }
+  // }, [response]);
 
-  const handleSignIn = async () => {
-    try {
-      const result = await promptAsync();
-      if (result?.type !== 'success') {
-        // Handle the case where the user cancels or there's an error
-        Alert.alert('Authentication failed');
-      }
-    } catch (error) {
-      console.error('Error in Google authentication:', error);
-    }
-  };
+  // const handleSignIn = async () => {
+  //   try {
+  //     const result = await promptAsync();
+  //     if (result?.type !== 'success') {
+  //       // Handle the case where the user cancels or there's an error
+  //       Alert.alert('Authentication failed');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error in Google authentication:', error);
+  //   }
+  // };
 
   // const signInWithGoogleAsync = async () => {
   //   try {
@@ -316,6 +411,32 @@ const LoginScreenNew = ({navigation, route}) => {
             progress={animationProgress.current}
           /> */}
         </Block>
+        <View style={styles.container}>
+          {!userInfo ? (
+            <Button
+              disabled={!request}
+              onPress={() => {
+                promptAsync();
+              }}>
+              <Text>Sign in with Google</Text>
+            </Button>
+          ) : (
+            <View style={styles.card}>
+              {userInfo?.picture && (
+                <Image source={{uri: userInfo?.picture}} style={styles.image} />
+              )}
+              <Text style={styles.text}>Email: {userInfo.email}</Text>
+              <Text style={styles.text}>
+                Verified: {userInfo.verified_email ? 'yes' : 'no'}
+              </Text>
+              <Text style={styles.text}>Name: {userInfo.name}</Text>
+              {/* <Text style={styles.text}>{JSON.stringify(userInfo, null, 2)}</Text> */}
+            </View>
+          )}
+          <Button onPress={async () => await AsyncStorage.removeItem('@user')}>
+            <Text>remove</Text>
+          </Button>
+        </View>
 
         <Animatable.View
           ref={blockRef}
@@ -852,13 +973,18 @@ Share to your friends
                           color={colors.icon}
                         />
                       </Button> */}
+                      {/* <GoogleSigninButton
+      style={{ width: 192, height: 48 }}
+      size={GoogleSigninButton.Size.Wide}
+      color={GoogleSigninButton.Color.Dark}
+      onPress={handleGoogleSignIn}
+    /> */}
                       <Button
                         outlined
                         gray
                         shadow={!isAndroid}
-                        style={{justifyContent: 'center', alignSelf: 'center'}} 
-                        onPress={handleSignIn}
-                        >
+                        style={{justifyContent: 'center', alignSelf: 'center'}}
+                        onPress={signUpGoogleHandler}>
                         <Image
                           source={assets.google}
                           height={sizes.m}
@@ -927,6 +1053,26 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1, // Allow input field to expand to fill available space
+  },
+  ontainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  card: {
+    borderWidth: 1,
+    borderRadius: 15,
+    padding: 15,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
 });
 

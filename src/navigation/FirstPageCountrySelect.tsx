@@ -126,7 +126,7 @@ const FirstPageCountrySelect = ({navigation}) => {
                         </Block>
                       ) : (
                         <Image
-                          source={{uri: `${selectedCountry.image_sm}`}}
+                          source={{uri: `${selectedCountry.image_lg}`}}
                           style={{
                             width: 30,
                             height: 30,
@@ -198,7 +198,7 @@ const FirstPageCountrySelect = ({navigation}) => {
                             </Block>
                           ) : (
                             <Image
-                              source={{uri: `${item.image_sm}`}}
+                              source={{uri: `${item.image_lg}`}}
                               style={{
                                 width: 30,
                                 height: 30,

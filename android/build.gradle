@@ -40,3 +40,13 @@ allprojects {
         maven { url 'https://www.jitpack.io' }
     }
 }
+publishing {
+    publications {
+        release(MavenPublication) {
+            from components.release
+            groupId = 'com.my.group'
+            artifactId = 'id'
+            version = Config.libraryVersion
+        }
+    }
+}

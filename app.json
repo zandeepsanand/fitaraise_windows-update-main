@@ -50,6 +50,7 @@
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
-    "owner": "sandeepsanand"
+    "owner": "sandeepsanand",
+    "scheme": "myGoogleApp"
   }
 }
