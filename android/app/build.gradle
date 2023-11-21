@@ -115,7 +115,7 @@ android {
 
     namespace 'com.sandeepsanand.sandeep'
     defaultConfig {
-        manifestPlaceholders = [appAuthRedirectScheme: 'dev.expo.app']
+        manifestPlaceholders = [appAuthRedirectScheme: 'myGoogleApp']
         applicationId 'com.sandeepsanand.sandeep'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion

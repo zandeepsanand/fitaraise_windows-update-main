@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import React, {useContext, useEffect, useState} from 'react';
-import {BASE_URL} from '@env';
 import {useTheme, useTranslation} from '../../hooks';
 import {Block, Button, Image, Input, Text} from '../../components/';
+
 import {
   Platform,
   TouchableWithoutFeedback,
@@ -23,22 +23,29 @@ import _ from 'lodash'; // Import Lodash
 import api from '../../../api';
 
 type Movie = {
-  id: string;
-  title: string;
-  releaseYear: string;
+  id: string,
+  title: string,
+  releaseYear: string,
 };
 
 const isAndroid = Platform.OS === 'android';
 const MorningSnackSingle = ({route, navigation}) => {
+  const {
+   
+    deleteItem,
+    morningSnackItems,
+    addMorningSnackItem
+  } = useContext(MealContext);
+
   const {data, formDataCopy} = route.params;
-  // console.log(formDataCopy);
+
   const [initialGram, setInitialGram] = useState(0);
   const [selectedWeight, setSelectedWeight] = useState(initialGram);
   useEffect(() => {
     setSelectedWeight(initialGram);
   }, [initialGram]);
 
-  const [selectedFood, setSelectedFood] = useState({});
+
   const [servingGrams, setServingGrams] = useState([]);
   const [servingDetails, setServingDetails] = useState([]);
   const [servingDetailsFull, setServingDetailsFull] = useState([]);
@@ -84,7 +91,7 @@ const MorningSnackSingle = ({route, navigation}) => {
   const [totalCalcium, setTotalCalcium] = useState(0);
   const [totalIron, setTotalIron] = useState(0);
   const {mealType, meal_type} = route.params;
-  const [foodItems, setFoodItems] = useState([]);
+ 
   const [editItemId, setEditItemId] = useState(null);
   const [editItemName, setEditItemName] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -94,30 +101,17 @@ const MorningSnackSingle = ({route, navigation}) => {
     setEditItemName(itemId.id);
   };
 
-  const [isEditFormVisible, setIsEditFormVisible] = useState(false);
+ 
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(null);
 
-  const {
-    
-    breakfastItems,
-    deleteItem,
-    morningSnackItems,
-    addBreakfastItem,
-    addMorningSnackItem,
-  } = useContext(MealContext);
-  // console.log(breakfastItems[0] ,"first one");
-
   const {assets, colors, gradients, sizes, fonts, user} = useTheme();
-  const [selectedValue, setSelectedValue] = useState(245);
-  const [count, setCount] = useState(1);
+
+
   const [gramCount, setGramCount] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
   const [textInputValue, setTextInputValue] = useState('');
-  const handleValueChange = (value) => {
-    setSelectedValue(value);
-    setTextInputValue(`You selected ${value}`);
-  };
+
   const [foodData, setFoodData] = useState();
   const {t} = useTranslation();
   const [isFullBlock, setIsFullBlock] = useState(false);
@@ -129,70 +123,48 @@ const MorningSnackSingle = ({route, navigation}) => {
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
   };
-  const IMAGE_SIZE = (sizes.width - (sizes.padding + sizes.sm) * 2) / 3;
-  const IMAGE_VERTICAL_SIZE =
-    (sizes.width - (sizes.padding + sizes.sm) * 2) / 2;
-  const IMAGE_MARGIN = (sizes.width - IMAGE_SIZE * 3 - sizes.padding * 2) / 2;
-  const IMAGE_VERTICAL_MARGIN =
-    (sizes.width - (IMAGE_VERTICAL_SIZE + sizes.sm) * 2) / 2;
-
   console.log('id', id);
+  const [isLoadingServingGrams, setIsLoadingServingGrams] = useState(false);
+
   const debouncedHandleEdit = _.debounce(handleEdit, 500);
 
   const toggleEdit = (item) => {
-    setIsEditMode(true); // Set isEditMode to true to hide the touch icon and show the block
+    setIsEditMode(true);
     debouncedHandleEdit.cancel();
     debouncedHandleEdit(item);
   };
 
-  const [isLoadingServingGrams, setIsLoadingServingGrams] = useState(false);
 
-  function handleEdit(item) {
-    setIsEditMode(true);
-    setIsLoadingServingGrams(true);
-    api
-      .get(`get_serving_desc_by_food_id/${item.id}`)
-      .then((response) => {
-        console.log(response.data.data, 'the food details');
-
-        setServingDetailsFull(response.data.data.serving_desc);
-        const servingNames = response.data.data.serving_desc.map(
-          (serving) => serving.name,
-        );
-        const servingId = response.data.data.serving_desc.map(
-          (serving) => serving.id,
-        );
-        servingId.unshift(4792);
-        const servingInitialGram = response.data.data.serving_desc.map(
-          (serving) => serving.weight,
-        );
-        const servingGrams = response.data.data.serving_desc.map(
-          (serving) => `${serving.name} (${serving.weight} g)`,
-        );
-        servingInitialGram.unshift(100);
-        setServingId(servingId[0]);
-        setServingDetails(servingNames);
-        nutritionCalculation(item);
-        setServingGrams(servingGrams);
-        setInitialGram(item.details.selectedWeight);
-        servingGrams.unshift('100 g');
-        setSelectedDropDown(item.details.selectedDropDown);
-        setIsLoadingServingGrams(false);
-      })
-      .catch((error) => {
-        console.error(error);
-        setIsEditMode(false);
-      });
+  async function handleEdit(item) {
+    try {
+      setIsEditMode(true);
+      setIsLoadingServingGrams(true);
+  
+      const response = await api.get(`get_serving_desc_by_food_id/${item.id}`);
+      const servingDesc = response.data.data.serving_desc;
+  
+      // Update state once with all necessary changes
+      const servingId = [4792, ...servingDesc.map((serving) => serving.id)];
+      const servingInitialGram = [item.details.selectedWeight, ...servingDesc.map((serving) => serving.weight)];
+      const servingGrams = [
+        `${item.details.selectedWeight} g`,
+        ...servingDesc.map((serving) => `${serving.name} (${serving.weight} g)`),
+      ];
+  
+      setServingDetailsFull(servingDesc);
+      setInitialGram(item.details.selectedWeight);
+      setServingId(servingId[0]);
+      setServingDetails(servingDesc.map((serving) => serving.name));
+      nutritionCalculation(item);
+      setServingGrams(servingGrams);
+      setSelectedDropDown(item.details.selectedDropDown);
+  
+      setIsLoadingServingGrams(false);
+    } catch (error) {
+      console.error(error);
+      setIsEditMode(false);
+    }
   }
-
-  // Define another function to be executed if food_id is available
-  function anotherFunction(foodData) {
-    // Your code to handle foodData goes here
-    console.log('Executing anotherFunction with foodData:', foodData);
-  }
-
-  // Replace the code inside anotherFunction with your specific logic for handling foodData
-
   function nutritionCalculation(item, selectedWeight1) {
     // without selecting the dropdown menu for calculation
     if (selectedWeight1 === undefined) {
@@ -351,6 +323,7 @@ const MorningSnackSingle = ({route, navigation}) => {
     calciumAmount,
     ironAmount,
   ]);
+  const serving_description_id = id;
   const mealDetails = {
     totalCalorie,
     totalProtein,
@@ -377,83 +350,40 @@ const MorningSnackSingle = ({route, navigation}) => {
     id,
     mealType,
     meal_type,
+    serving_description_id,
   };
   // console.log(id, 'db id ');
-  const handleAddFood = (item) => {
+
+  const handleAddFood = async (item) => {
     setIsLoading(true);
     setIsEditMode(false);
     switch (mealType) {
-      case 'breakfast':
-      case 'breakfast':
-        // console.log(responseData, 'from device breakfast');
-
-        addBreakfastItem(item, mealDetails);
-        break;
       case 'morningSnackItems':
-        addMorningSnackItem(item, mealDetails);
-        break;
-      case 'lunch':
-        addLunchItem(item, mealDetails);
-        break;
-      case 'evening':
-        addEveningSnackItem(item, mealDetails);
-        break;
-      case 'dinner':
-        addDinnerItem(item, mealDetails);
-        break;
-      case 'meal1':
-        addMealItem1(item, mealDetails);
-        break;
-      case 'meal2':
-        addMealItem2(item, mealDetails);
+        try {
+          await addMorningSnackItem(item, mealDetails);
+          console.log('morngsnack item added successfully');
+          console.log(mealDetails, 'dark');
+          // Handle any post-addition logic or navigation here
+          setIsLoading(false);
+        } catch (error) {
+          setIsLoading(false);
+          console.error('Error adding morng item:', error);
+          // Handle the error, if necessary
+        }
         break;
       default:
         break;
     }
-  
   };
-
   const handleDelete = (itemIndex: number, mealType: string) => {
     switch (mealType) {
-      case 'breakfast':
-        const newBreakfastItems = [...breakfastItems];
-        newBreakfastItems.splice(itemIndex, 1);
-        deleteItem(newBreakfastItems, mealType);
-        break;
+    
       case 'morningSnackItems':
         const newMorningSnackItems = [...morningSnackItems];
         newMorningSnackItems.splice(itemIndex, 1);
         deleteItem(newMorningSnackItems, mealType);
         break;
-      case 'lunch':
-        // console.log('lunchhhh');
-
-        const newLunchItems = [...lunchItems];
-        newLunchItems.splice(itemIndex, 1);
-        deleteItem(newLunchItems, mealType);
-        break;
-      case 'evening':
-        // console.log('lunchhhh');
-
-        const neweveningItems = [...eveningSnackItems];
-        neweveningItems.splice(itemIndex, 1);
-        deleteItem(neweveningItems, mealType);
-        break;
-      case 'dinner':
-        const newDinnerItems = [...dinnerItems];
-        newDinnerItems.splice(itemIndex, 1);
-        deleteItem(newDinnerItems, mealType);
-        break;
-      case 'meal1':
-        const newMealItem1 = [...mealItems1];
-        newMealItem1.splice(itemIndex, 1);
-        deleteItem(newMealItem1, mealType);
-        break;
-      case 'meal2':
-        const newMealItem2 = [...mealItems2];
-        newMealItem2.splice(itemIndex, 1);
-        deleteItem(newMealItem2, mealType);
-        break;
+      
       default:
         break;
     }
@@ -470,32 +400,59 @@ const MorningSnackSingle = ({route, navigation}) => {
         console.error('Error deleteing using api:', error);
       });
   };
-  const handleSave = (id) => {
-    updateBreakfastItem(id, mealDetails);
-    // navigation.goBack();
-  };
+
   const [expanded, setExpanded] = useState(false);
   const [expandedEdit, setExpandedEdit] = useState(false);
 
-  const toggleAccordion = () => {
-    setExpanded(!expanded);
-  };
-  // const toggleEdit = (item) => {
-  //   setExpandedEdit(!expandedEdit);
-  // };
   const handleToggleDetails = (itemId) => {
     setExpanded(!expanded);
     setSelectedItemId(itemId);
   };
+  // const totalBreakfastCalorie = breakfastItems.reduce(
+  //   (acc, item) => acc + parseFloat(item.details.totalCalorie),
+  //   0
+  // );
+  const array1 = [1000, 2, 3, 4];
+
+  // 0 + 1 + 2 + 3 + 4
   const totalMorningSnackItemsCalorie = morningSnackItems.reduce(
-    (acc, item) => acc + parseFloat(item.details.totalCalorie),
+    (accumulator, currentValue) => {
+      // Remove formatting characters (e.g., commas) before parsing
+      const value = currentValue.details.totalCalorie.replace(/,/g, '');
+      return accumulator + parseFloat(value);
+    },
     0,
   );
-  // const totalBreakfastCalories = totalBreakfastCalorie.toFixed(2);
-  // console.log("total calorie for breakfast items: ", totalBreakfastCalories);
+
+  console.log(totalMorningSnackItemsCalorie, 'total sum');
+
+  // Format the number to always show 2 decimal places
+  const formattedTotalCalorie = totalMorningSnackItemsCalorie.toFixed(2);
+
+  console.log('Total morngSnack calorie:', formattedTotalCalorie);
 
   return (
     <Block safe scroll>
+      <Block flex={0} style={{position: 'absolute', zIndex: 10}}>
+        <Button
+          marginTop={40}
+          marginLeft={10}
+          row
+          flex={0}
+          justify="flex-start"
+          onPress={() => navigation.goBack()}>
+          <Image
+            radius={0}
+            width={10}
+            height={18}
+            color={colors.white}
+            source={assets.arrow}
+            transform={[{rotate: '180deg'}]}
+          />
+          <Text p white marginLeft={sizes.s}></Text>
+        </Button>
+      </Block>
+
       <Block
         center
         flex={0.3}
@@ -504,6 +461,7 @@ const MorningSnackSingle = ({route, navigation}) => {
           backgroundColor: '#3cf29d',
           borderBottomRightRadius: 10,
           borderBottomLeftRadius: 10,
+          position: 'relative',
         }}>
         {mealType === 'breakfast' ? (
           <Text bold padding={10}>
@@ -525,7 +483,11 @@ const MorningSnackSingle = ({route, navigation}) => {
           progressValueColor={'#ffff'}
           activeStrokeColor="#baabf9"
           maxValue={data.calories * 0.2}
-          circleBackgroundColor={'#353353'}
+          circleBackgroundColor={
+            totalMorningSnackItemsCalorie > data.calories * 0.2
+              ? 'lightcoral'
+              : '#353353'
+          }
           title={
             // totalCaloriesOfAllFoods >= data.calories ? 'REACHED 🔥' : 'KCAL LEFT 🔥'
             'KCAL'
@@ -544,7 +506,7 @@ const MorningSnackSingle = ({route, navigation}) => {
           <TouchableWithoutFeedback
             onPress={() =>
               navigation.navigate('searchfood', {
-                mealType: 'breakfast',
+                mealType: 'morningSnackItems',
                 meal_type,
                 formDataCopy,
               })
@@ -574,7 +536,6 @@ const MorningSnackSingle = ({route, navigation}) => {
                 marginTop={sizes.m}
                 marginHorizontal={0}
                 card
-               
                 flex={0.5}>
                 <Block row align="center">
                   <Block flex={0}>
@@ -653,211 +614,220 @@ const MorningSnackSingle = ({route, navigation}) => {
                     </TouchableWithoutFeedback>
                   </Block>
                 </Block>
-                <Block row flex={0} align="center" justify="center" marginTop={5}>
-                      <Block
-                        flex={0}
-                        height={1}
-                        width="50%"
-                        end={[1, 0]}
-                        start={[0, 1]}
-                        gradient={gradients.divider}
-                      />
-                      <Text center marginHorizontal={sizes.s}></Text>
-                      <Block
-                        flex={0}
-                        height={1}
-                        width="50%"
-                        end={[0, 1]}
-                        start={[1, 0]}
-                        gradient={gradients.divider}
-                      />
-                    </Block>
+                <Block
+                  row
+                  flex={0}
+                  align="center"
+                  justify="center"
+                  marginTop={5}>
+                  <Block
+                    flex={0}
+                    height={1}
+                    width="50%"
+                    end={[1, 0]}
+                    start={[0, 1]}
+                    gradient={gradients.divider}
+                  />
+                  <Text center marginHorizontal={sizes.s}></Text>
+                  <Block
+                    flex={0}
+                    height={1}
+                    width="50%"
+                    end={[0, 1]}
+                    start={[1, 0]}
+                    gradient={gradients.divider}
+                  />
+                </Block>
+
                 <Block margin={0}>
                   <Block margin={0} paddingTop={10} paddingLeft={10}>
                     {isEditMode &&
                     editItemId === item.details.id &&
                     editItemName === item.id ? (
-                      <Block
-                        row
-                        style={{alignSelf: 'center'}}
-                        paddingTop={20}
-                        flex={0}>
-                        <Input
-                          marginBottom={sizes.s}
-                          placeholder={item.details.multiplication.toString()} // Convert to string in case it's a number
-                          keyboardType="numeric"
-                          maxLength={3}
-                          style={{
-                            height: 50,
-                            width: 60,
-                            backgroundColor: 'white',
-                          }}
-                          onChangeText={(value) => {
-                            {
-                              // setCount(value);
-                              handleGramChange(value);
-                            }
-                          }}
-                        />
+                      <>
+                        {isLoading ? (
+                          <ActivityIndicator size="large" color="green" />
+                        ) : (
+                          <Block
+                            row
+                            style={{alignSelf: 'center'}}
+                            paddingTop={20}
+                            flex={0}>
+                            <Input
+                              marginBottom={sizes.s}
+                              placeholder={item.details.multiplication.toString()} // Convert to string in case it's a number
+                              keyboardType="numeric"
+                              maxLength={3}
+                              style={{
+                                height: 50,
+                                width: 60,
+                                backgroundColor: 'white',
+                              }}
+                              onChangeText={(value) => {
+                                {
+                                
+                                  handleGramChange(value);
+                                }
+                              }}
+                            />
 
-                        <Block
-                          style={{
-                            height: 50,
-                            // width: 300,
-                            backgroundColor: 'white',
-                            borderRadius: 20,
-                            marginLeft: 10,
-                          }}>
-                          <SelectDropdown
-                            // defaultValue={item.details.selectedWeight}
-                            dropdownStyle={{borderRadius: 20}}
-                            buttonStyle={{
-                              height: 50,
-                              width: 200,
-                              backgroundColor: 'white',
-                              borderRadius: 20,
-                              marginLeft: 10,
-                            }}
-                            data={
-                              isLoadingServingGrams
-                                ? ['Loading...']
-                                : servingGrams
-                            }
-                            onSelect={(selectedItem, index) => {
-                              // console.log(servingGrams, 'ok bie ');
-                              const item1 = servingGrams.find((item1) =>
-                                item1.includes(selectedItem),
-                              );
+                            <Block
+                              style={{
+                                height: 50,
+                                // width: 300,
+                                backgroundColor: 'white',
+                                borderRadius: 20,
+                                marginLeft: 10,
+                              }}>
+                              <SelectDropdown
+                                // defaultValue={item.details.selectedWeight}
+                                dropdownStyle={{borderRadius: 20}}
+                                buttonStyle={{
+                                  height: 50,
+                                  width: 200,
+                                  backgroundColor: '#f2f8fc',
+                                  borderRadius: 20,
+                                  marginLeft: 10,
+                                }}
+                                data={
+                                  isLoadingServingGrams
+                                    ? ['Loading...']
+                                    : servingGrams
+                                }
+                                onSelect={(selectedItem, index) => {
+                                  // console.log(servingGrams, 'ok bie ');
+                                  const item1 = servingGrams.find((item1) =>
+                                    item1.includes(selectedItem),
+                                  );
 
-                              const selectedWeight1 = item1
-                                ? item1
-                                    .split(' ')
-                                    [item1.split(' ').length - 2].replace(
-                                      '(',
-                                      '',
-                                    )
-                                : null;
-                              // console.log('selected weight is ', selectedWeight1);
-                              setSelectedWeight(selectedWeight1);
-                              nutritionCalculation(item, selectedWeight1);
+                                  const selectedWeight1 = item1
+                                    ? item1
+                                        .split(' ')
+                                        [item1.split(' ').length - 2].replace(
+                                          '(',
+                                          '',
+                                        )
+                                    : null;
+                                  // console.log('selected weight is ', selectedWeight1);
+                                  setSelectedWeight(selectedWeight1);
+                                  nutritionCalculation(item, selectedWeight1);
 
-                              // console.log('selected weight is2', selectedWeight);
+                                  // console.log('selected weight is2', selectedWeight);
 
-                              // Get the ID of the selected item
-                              // console.log('this is serving detrails', servingDetailsFull);
-                              const ids = servingDetailsFull.find(
-                                (ids) =>
-                                  ids.name === selectedItem.split(' (')[0],
-                              );
-                              // console.log('dark', ids);
-                              if (ids) {
-                                setServingId(ids.id);
-                              }
-                            }}
-                            buttonTextAfterSelection={(selectedItem, index) => {
-                              // console.log(selectedItem);
-                              setSelectedDropDown(selectedItem);
-                              // console.log('hallalalalalalla', selectedDropDown);
-                              // text represented after item is selected
-                              // if data array is an array of objects then return selectedItem.property to render after item is selected
-                              return selectedItem;
-                            }}
-                            rowTextForSelection={(item, index) => {
-                              // text represented for each item in dropdown
-                              // if data array is an array of objects then return item.property to represent item in dropdown
-                              return item;
-                            }}
-                            defaultButtonText={item.details.selectedDropDown}
-                          />
-                        </Block>
-                        <Block
-                          card
-                          color={'#ffff'}
-                          flex={0}
-                          // paddingHorizontal={10}
-                          marginLeft={20}
-                          // marginTop={-10}
-                          style={{
-                            // width: 200,
-                            alignSelf: 'flex-end',
-                            backgroundColor: '#94a9fe',
-                            position: 'relative',
-                            top: -12,
-                          }}>
-                          <TouchableWithoutFeedback
-                            onPress={() => {
-                              // setSelectedFood(item.food_name);
+                                  // Get the ID of the selected item
+                                  // console.log('this is serving detrails', servingDetailsFull);
+                                  const ids = servingDetailsFull.find(
+                                    (ids) =>
+                                      ids.name === selectedItem.split(' (')[0],
+                                  );
+                                  // console.log('dark', ids);
+                                  if (ids) {
+                                    setServingId(ids.id);
+                                  }
+                                }}
+                                buttonTextAfterSelection={(
+                                  selectedItem,
+                                  index,
+                                ) => {
+                                  // console.log(selectedItem);
+                                  setSelectedDropDown(selectedItem);
+                                  // console.log('hallalalalalalla', selectedDropDown);
+                                  // text represented after item is selected
+                                  // if data array is an array of objects then return selectedItem.property to render after item is selected
+                                  return selectedItem;
+                                }}
+                                rowTextForSelection={(item, index) => {
+                                  // text represented for each item in dropdown
+                                  // if data array is an array of objects then return item.property to represent item in dropdown
+                                  return item;
+                                }}
+                                defaultButtonText={
+                                  item.serving_description_id === 4792
+                                    ? item.details.taken_weight
+                                    : item.details.selectedDropDown
+                                }
+                              />
+                            </Block>
+                            <Block
+                              card
+                              color={'#ffff'}
+                              flex={0}
+                              // paddingHorizontal={10}
+                              marginLeft={20}
+                              // marginTop={-10}
+                              style={{
+                                // width: 200,
+                                alignSelf: 'flex-end',
+                                backgroundColor: '#94a9fe',
+                                position: 'relative',
+                                top: -12,
+                              }}>
+                              {isLoading ? (
+                                <ActivityIndicator size="large" color="green" />
+                              ) : (
+                                <TouchableWithoutFeedback
+                                  onPress={() => {
+                                    // setSelectedFood(item.food_name);
 
-                              handleAddFood(item);
-                            }}>
-                            <Text bold>Update</Text>
-                          </TouchableWithoutFeedback>
-                        </Block>
-                      </Block>
+                                    handleAddFood(item);
+                                  }}>
+                                  <Text bold primary>
+                                    Update
+                                  </Text>
+                                </TouchableWithoutFeedback>
+                              )}
+                            </Block>
+                          </Block>
+                        )}
+                      </>
                     ) : (
                       <Block>
-                        <Block style={styles.row} flex={0}>
-                          <Block flex={0}>
-                            <Text paddingRight={10} semibold>
-                              Quantity
-                            </Text>
-                          </Block>
-                          <Block flex={3}>
-                            <Text center semibold>
-                              Selected serving size
-                            </Text>
-                          </Block>
-                          <Block flex={0} width={40}></Block>
-                        </Block>
-                        <Block style={styles.row} flex={0} paddingTop={10}>
-                          <Block flex={0} width={65}>
-                            <Text paddingRight={10} center>
-                              {item.details.multiplication}
-                            </Text>
-                          </Block>
-
-                          <Block flex={3}>
-                            <Text center>{item.details.selectedDropDown}</Text>
-                          </Block>
-                          <TouchableWithoutFeedback
-                            key={item.details.id}
-                            onPress={() => {
-                              debouncedHandleEdit(item);
-                              toggleEdit(item);
-                              handleEditButtonClick(item);
-                            }}>
+                        {item.serving_description_id === 4792 ? (
+                          <Block flex={3}></Block>
+                        ) : (
+                          <Block style={styles.row} flex={0}>
                             <Block flex={0}>
-                              <Image
-                                marginLeft={5}
-                                marginRight={10}
-                                marginTop={1}
-                                source={require('../../assets/icons/edit1.png')}
-                                 color={'gray'}
-                                style={
-                                  (styles.data, {width: 30, height: 30})
-                                }></Image>
+                              <Text paddingRight={10} semibold >
+                                Quantity
+                              </Text>
                             </Block>
-                          </TouchableWithoutFeedback>
-                        </Block>
-                        <>
+                            <Block flex={3}>
+                              <Text center semibold>
+                                Selected serving size
+                              </Text>
+                            </Block>
+                            <Block flex={0} width={40}></Block>
+                          </Block>
+                        )}
+
+                        {isLoading ? (
+                          <ActivityIndicator size="large" color="green" />
+                        ) : (
+                          <>
                             {item.serving_description_id === 4792 ? (
                               <Block
                                 style={styles.row}
                                 flex={0}
                                 paddingTop={10}>
                                 <Block flex={0} width={65} center>
-                                  <Text paddingRight={10} center>
-                                    Selected Weight
+                                  <Text paddingRight={10} center bold primary>
+                                    Total Weight
                                   </Text>
                                 </Block>
-                                {isEditMode  ? (
+                                {isEditMode &&
+                                editItemId === item.serving_description_id &&
+                                editItemName === item.id ? (
                                   <Block flex={3} center>
                                     <TextInput />
                                   </Block>
                                 ) : (
                                   <Block flex={3} center>
-                                    <Text center>
-                                      {item.details.selectedDropDown}
+                                    <Text center primary bold>
+                                      {' '}
+                                      {item.serving_description_id === 4792
+                                        ? item.details.taken_weight
+                                        : item.details.selectedDropDown}{' '}
+                                      gm
                                     </Text>
                                   </Block>
                                 )}
@@ -866,8 +836,8 @@ const MorningSnackSingle = ({route, navigation}) => {
                                   key={item.details.id}
                                   onPress={() => {
                                     debouncedHandleEdit(item);
-                              toggleEdit(item);
-                              handleEditButtonClick(item);
+                                    toggleEdit(item);
+                                    handleEditButtonClick(item);
                                   }}>
                                   <Block flex={0} center>
                                     <Image
@@ -875,7 +845,7 @@ const MorningSnackSingle = ({route, navigation}) => {
                                       marginRight={10}
                                       marginTop={1}
                                       source={require('../../assets/icons/edit1.png')}
-                                      color={'green'}
+                                      color={'#449c4a'}
                                       style={
                                         (styles.data, {width: 40, height: 40})
                                       }></Image>
@@ -888,14 +858,16 @@ const MorningSnackSingle = ({route, navigation}) => {
                                 flex={0}
                                 paddingTop={10}>
                                 <Block flex={0} width={65} center>
-                                  <Text paddingRight={10} center>
+                                  <Text paddingRight={10} center bold primary>
                                     {item.details.multiplication}
                                   </Text>
                                 </Block>
 
                                 <Block flex={3} center>
-                                  <Text center>
-                                    {item.details.selectedDropDown}
+                                  <Text center bold primary>
+                                    {item.serving_description_id === 4792
+                                      ? item.details.taken_weight
+                                      : item.details.selectedDropDown}
                                   </Text>
                                 </Block>
                                 <TouchableWithoutFeedback
@@ -911,7 +883,7 @@ const MorningSnackSingle = ({route, navigation}) => {
                                       marginRight={10}
                                       marginTop={1}
                                       source={require('../../assets/icons/edit1.png')}
-                                      color={'red'}
+                                      color={'#449c4a'}
                                       style={
                                         (styles.data, {width: 40, height: 40})
                                       }></Image>
@@ -920,9 +892,15 @@ const MorningSnackSingle = ({route, navigation}) => {
                               </Block>
                             )}
                           </>
+                        )}
                       </Block>
                     )}
-                    <Block row flex={0} align="center" justify="center" marginTop={15}>
+                    <Block
+                      row
+                      flex={0}
+                      align="center"
+                      justify="center"
+                      marginTop={15}>
                       <Block
                         flex={0}
                         height={1}
@@ -949,9 +927,9 @@ const MorningSnackSingle = ({route, navigation}) => {
                         }}>
                         <Block padding={10} align="center">
                           {expanded && selectedItemId === item.details.id ? (
-                            <Text>Hide</Text>
+                            <Text bold>Hide</Text>
                           ) : (
-                            <Text>Full Details </Text>
+                            <Text bold>Full Details </Text>
                           )}
                         </Block>
                       </TouchableWithoutFeedback>

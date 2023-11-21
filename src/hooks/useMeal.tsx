@@ -21,7 +21,7 @@ interface MealContextType {
   dinnerItems: any[];
   mealItems1: any[];
   mealItems2: any[];
-  water:any[];
+  water: any[];
   addBreakfastItem: (food: any) => void;
   addMorningSnackItem: (food: any) => void;
   addEveningSnackItem: (food: any) => void;
@@ -29,7 +29,7 @@ interface MealContextType {
   addDinnerItem: (food: any) => void;
   addMealItem1: (food: any) => void;
   addMealItem2: (food: any) => void;
-  addWater: (plus:any) => void;
+  addWater: (plus: any) => void;
   deleteItem: (items: any[], mealType: string) => void;
   clearContextData: () => void;
   totalCalories: number;
@@ -45,7 +45,7 @@ export const MealContext = createContext<MealContextType>({
   dinnerItems: [],
   mealItems1: [],
   mealItems2: [],
-  water:[],
+  water: [],
   addBreakfastItem: () => {},
   addMorningSnackItem: () => {},
   addEveningSnackItem: () => {},
@@ -73,7 +73,7 @@ const MealContextProvider: React.FC = ({children}) => {
   const [mealItems2, setMealItems2] = useState<any[]>([]);
   const [water, setWater] = useState<any[]>(null);
   console.log('====================================');
-  console.log(water, "usemeal data");
+  console.log(water, 'usemeal data');
   console.log('====================================');
   const [transformedData, setTransformedData] = useState([]);
   const [totalCalories, setTotalCalories] = useState(0);
@@ -103,10 +103,9 @@ const MealContextProvider: React.FC = ({children}) => {
     const lunchData = dietDetails.find((meal) => meal.meal_type_id === 4);
     const meal1Data = dietDetails.find((meal) => meal.meal_type_id === 7);
     const meal2Data = dietDetails.find((meal) => meal.meal_type_id === 8);
-    
 
     const result = {};
-  
+
     if (breakfastData) {
       const mappedBreakfastData = breakfastData.diet_list.map((item) => {
         return {
@@ -163,7 +162,7 @@ const MealContextProvider: React.FC = ({children}) => {
           serving_desc_8: null,
           serving_desc_9: null,
           serving_size: item.taken_weight,
-          serving_description_id:item.serving_description_id,
+          serving_description_id: item.serving_description_id,
           serving_weight_1: 28,
           serving_weight_2: 50,
           serving_weight_3: 180,
@@ -182,7 +181,6 @@ const MealContextProvider: React.FC = ({children}) => {
           vitamin_c_in_mg: item.vitamin_c,
           vitamin_d_mg: item.vitamin_d,
           weight_in_g: item.taken_weight,
-
         };
       });
       result.breakfastItems = mappedBreakfastData;
@@ -243,7 +241,7 @@ const MealContextProvider: React.FC = ({children}) => {
           serving_desc_8: null,
           serving_desc_9: null,
           serving_size: item.taken_weight,
-          serving_description_id:item.serving_description_id,
+          serving_description_id: item.serving_description_id,
           serving_weight_1: 28,
           serving_weight_2: 50,
           serving_weight_3: 180,
@@ -322,6 +320,7 @@ const MealContextProvider: React.FC = ({children}) => {
           serving_desc_8: null,
           serving_desc_9: null,
           serving_size: item.taken_weight,
+          serving_description_id: item.serving_description_id,
           serving_weight_1: 28,
           serving_weight_2: 50,
           serving_weight_3: 180,
@@ -400,6 +399,7 @@ const MealContextProvider: React.FC = ({children}) => {
           serving_desc_8: null,
           serving_desc_9: null,
           serving_size: item.taken_weight,
+          serving_description_id: item.serving_description_id,
           serving_weight_1: 28,
           serving_weight_2: 50,
           serving_weight_3: 180,
@@ -478,6 +478,7 @@ const MealContextProvider: React.FC = ({children}) => {
           serving_desc_8: null,
           serving_desc_9: null,
           serving_size: item.taken_weight,
+          serving_description_id: item.serving_description_id,
           serving_weight_1: 28,
           serving_weight_2: 50,
           serving_weight_3: 180,
@@ -556,6 +557,7 @@ const MealContextProvider: React.FC = ({children}) => {
           serving_desc_8: null,
           serving_desc_9: null,
           serving_size: item.taken_weight,
+          serving_description_id: item.serving_description_id,
           serving_weight_1: 28,
           serving_weight_2: 50,
           serving_weight_3: 180,
@@ -634,6 +636,7 @@ const MealContextProvider: React.FC = ({children}) => {
           serving_desc_8: null,
           serving_desc_9: null,
           serving_size: item.taken_weight,
+          serving_description_id: item.serving_description_id,
           serving_weight_1: 28,
           serving_weight_2: 50,
           serving_weight_3: 180,
@@ -656,7 +659,7 @@ const MealContextProvider: React.FC = ({children}) => {
       });
       result.dinnerItems = mappedDinnerData;
     }
-    if(waterData){
+    if (waterData) {
       result.water = waterData;
     }
 
@@ -672,77 +675,69 @@ const MealContextProvider: React.FC = ({children}) => {
   useEffect(() => {
     console.log(breakfastItems.length, isLoading, 'the properties');
     // Create a function to fetch and process data
-    
-      const fetchData = async () => {
-        try {
-          const currentDate = new Date();
-          const formattedDate = `${currentDate.getFullYear()}-${String(
-            currentDate.getMonth() + 1,
-          ).padStart(2, '0')}-${String(currentDate.getDate()).padStart(
-            2,
-            '0',
-          )}`;
 
-          const apiUrl = `get_diet_list_wrt_date/${customerId}/${formattedDate}`;
-          // Make the API request to get data
-          const response = await api.get(apiUrl);
-          const responseData = response.data;
-          console.log(responseData.data , 'for water');
-        
-          const transformedData = mapApiDataToDesiredFormat(responseData);
+    const fetchData = async () => {
+      try {
+        const currentDate = new Date();
+        const formattedDate = `${currentDate.getFullYear()}-${String(
+          currentDate.getMonth() + 1,
+        ).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
 
-          if (transformedData.breakfastItems) {
-            console.log('Effect is running 2');
-            setBreakfastItems(transformedData.breakfastItems);
-            // console.log(transformedData.breakfastItems, 'useEffect breakfast');
-          }
-          if (transformedData.dinnerItems) {
-            setDinnerItems(transformedData.dinnerItems);
-          }
-          if (transformedData.morningSnackItems) {
-            setMorningSnackItems(transformedData.morningSnackItems);
-          }
-          if (transformedData.eveningSnackItems) {
-            setEveningSnackItems(transformedData.eveningSnackItems);
-          }
-          if (transformedData.lunchItems) {
-            setLunchItems(transformedData.lunchItems);
-          }
-          if (transformedData.mealItems1) {
-            setMealItems1(transformedData.mealItems1);
-          }
-          if (transformedData.mealItems2) {
-            setMealItems2(transformedData.mealItems2);
-          }
-          // setWater
-      
-    
-          // Move the setWater line here
-         
+        const apiUrl = `get_diet_list_wrt_date/${customerId}/${formattedDate}`;
+        // Make the API request to get data
+        const response = await api.get(apiUrl);
+        const responseData = response.data;
+        console.log(responseData.data, 'for water');
 
-        
-        } catch (error) {
-          console.error('Error:', error);
-          if (error.response && error.response.data) {
-            console.error('Server Error Details:', error.response.data);
-            // You can set an error state or show an error message to the user here.
-          }
-        } finally {
-          setIsLoading(false);
-          setFetchDataFlag(false);
+        const transformedData = mapApiDataToDesiredFormat(responseData);
+
+        if (transformedData.breakfastItems) {
+          console.log('Effect is running 2');
+          setBreakfastItems(transformedData.breakfastItems);
+          // console.log(transformedData.breakfastItems, 'useEffect breakfast');
         }
-      };
+        if (transformedData.dinnerItems) {
+          setDinnerItems(transformedData.dinnerItems);
+        }
+        if (transformedData.morningSnackItems) {
+          setMorningSnackItems(transformedData.morningSnackItems);
+        }
+        if (transformedData.eveningSnackItems) {
+          setEveningSnackItems(transformedData.eveningSnackItems);
+        }
+        if (transformedData.lunchItems) {
+          setLunchItems(transformedData.lunchItems);
+        }
+        if (transformedData.mealItems1) {
+          setMealItems1(transformedData.mealItems1);
+        }
+        if (transformedData.mealItems2) {
+          setMealItems2(transformedData.mealItems2);
+        }
+        // setWater
 
-      // Check if data is not already loaded (isLoading is true) and if authenticated
-      // Call the data fetch function
-      if ( isLoading) {
-        fetchData();
+        // Move the setWater line here
+      } catch (error) {
+        console.error('Error:', error);
+        if (error.response && error.response.data) {
+          console.error('Server Error Details:', error.response.data);
+          // You can set an error state or show an error message to the user here.
+        }
+      } finally {
+        setIsLoading(false);
+        setFetchDataFlag(false);
       }
-    
-  },[breakfastItems, isLoading, authenticated, customerId, setWater]); // Include authenticated in the dependency array
+    };
+
+    // Check if data is not already loaded (isLoading is true) and if authenticated
+    // Call the data fetch function
+    if (isLoading) {
+      fetchData();
+    }
+  }, [breakfastItems, isLoading, authenticated, customerId, setWater]); // Include authenticated in the dependency array
   useEffect(() => {
     // Check if water is null after it has been set
-    if (water===null){
+    if (water === null) {
       console.log('====================================');
       console.log('backup code');
       console.log('====================================');
@@ -755,16 +750,14 @@ const MealContextProvider: React.FC = ({children}) => {
             2,
             '0',
           )}`;
-  
+
           const apiUrl = `get_daily_required_calories/${customerId}`;
           // Make the API request to get data
           const response = await api.get(apiUrl);
           const responseData = response.data;
-          console.log(responseData.data , 'for water usemeal single ');
+          console.log(responseData.data, 'for water usemeal single ');
           // Move the setWater line here
           setWater(responseData.data.water_datas);
-  
-     
         } catch (error) {
           console.error('Error:', error);
           if (error.response && error.response.data) {
@@ -780,10 +773,8 @@ const MealContextProvider: React.FC = ({children}) => {
         redoMealContext();
       }
     }
-  
-  }, [water,customerId]);
+  }, [water, customerId]);
 
-  
   const addBreakfastItem = (food: any, details: any) => {
     const existingIndex = breakfastItems.findIndex(
       (item) => item.id === food.id,
@@ -807,9 +798,7 @@ const MealContextProvider: React.FC = ({children}) => {
         // bodyFormData.append('serving_desc_id', details.serving_description_id);
         bodyFormData.append('desc_num_food_tbl', details.id);
 
-
         bodyFormData.append('serving_desc_id', details.id);
-    
 
         api({
           method: 'post',
@@ -850,7 +839,7 @@ const MealContextProvider: React.FC = ({children}) => {
                     updatedItems[existingIndex] = {
                       ...food,
                       details: itemToAdd.details,
-                      serving_description_id:itemToAdd.serving_description_id
+                      serving_description_id: itemToAdd.serving_description_id,
                     };
                     setBreakfastItems(updatedItems);
                   }
@@ -924,8 +913,10 @@ const MealContextProvider: React.FC = ({children}) => {
                   // Add the item to breakfastItems
                   setBreakfastItems((prevItems) => [
                     ...prevItems,
-                    {...food, details: itemToAdd.details,
-                      serving_description_id:itemToAdd.serving_description_id
+                    {
+                      ...food,
+                      details: itemToAdd.details,
+                      serving_description_id: itemToAdd.serving_description_id,
                     },
                   ]);
                 }
@@ -964,8 +955,10 @@ const MealContextProvider: React.FC = ({children}) => {
         bodyFormData.append('food_id', food.id);
         bodyFormData.append('taken_weight', details.selectedWeight);
         bodyFormData.append('quantity', details.multiplication);
-        bodyFormData.append('serving_desc_id', details.serving_description_id);
+        // bodyFormData.append('serving_desc_id', details.serving_description_id);
         bodyFormData.append('desc_num_food_tbl', details.id);
+
+        bodyFormData.append('serving_desc_id', details.id);
 
         api({
           method: 'post',
@@ -1009,7 +1002,7 @@ const MealContextProvider: React.FC = ({children}) => {
                     updatedItems[existingIndex] = {
                       ...food,
                       details: itemToAdd.details,
-                      serving_description_id:itemToAdd.serving_description_id
+                      serving_description_id: itemToAdd.serving_description_id,
                     };
                     setMorningSnackItems(updatedItems);
                   }
@@ -1032,8 +1025,6 @@ const MealContextProvider: React.FC = ({children}) => {
         return; // Exit the function
       }
     } else {
-      console.log(food, 'id from db to update food');
-      console.log(details, 'details id from db to update');
       // Now, you can update the API with the newly added data
       var bodyFormData = new FormData();
       bodyFormData.append('customer_id', details.customer_id);
@@ -1072,7 +1063,10 @@ const MealContextProvider: React.FC = ({children}) => {
               const responseData = response.data;
               const transformedData = mapApiDataToDesiredFormat(responseData);
 
-              // console.log(transformedData.morning, 'breakfast adding');
+              console.log(
+                transformedData.morningSnackItems,
+                'breakfast adding',
+              );
               // Assuming transformedData contains the breakfast data
               if (transformedData.morningSnackItems && details.food_id) {
                 const itemToAdd = transformedData.morningSnackItems.find(
@@ -1085,7 +1079,11 @@ const MealContextProvider: React.FC = ({children}) => {
                   // Add the item to breakfastItems
                   setMorningSnackItems((prevItems) => [
                     ...prevItems,
-                    {...food, details: itemToAdd.details},
+                    {
+                      ...food,
+                      details: itemToAdd.details,
+                      serving_description_id: itemToAdd.serving_description_id,
+                    },
                   ]);
                 }
               }
@@ -1122,8 +1120,10 @@ const MealContextProvider: React.FC = ({children}) => {
         bodyFormData.append('food_id', food.id);
         bodyFormData.append('taken_weight', details.selectedWeight);
         bodyFormData.append('quantity', details.multiplication);
-        bodyFormData.append('serving_desc_id', details.id);
+        // bodyFormData.append('serving_desc_id', details.serving_description_id);
         bodyFormData.append('desc_num_food_tbl', details.id);
+
+        bodyFormData.append('serving_desc_id', details.id);
 
         api({
           method: 'post',
@@ -1167,6 +1167,7 @@ const MealContextProvider: React.FC = ({children}) => {
                     updatedItems[existingIndex] = {
                       ...food,
                       details: itemToAdd.details,
+                      serving_description_id: itemToAdd.serving_description_id,
                     };
                     setEveningSnackItems(updatedItems);
                   }
@@ -1189,9 +1190,6 @@ const MealContextProvider: React.FC = ({children}) => {
         return; // Exit the function
       }
     } else {
-      console.log(food, 'id from db to update food');
-      console.log(details, 'details id from db to update');
-      // Now, you can update the API with the newly added data
       var bodyFormData = new FormData();
       bodyFormData.append('customer_id', details.customer_id);
       bodyFormData.append('meal_type', details.meal_type);
@@ -1242,7 +1240,11 @@ const MealContextProvider: React.FC = ({children}) => {
                   // Add the item to breakfastItems
                   setEveningSnackItems((prevItems) => [
                     ...prevItems,
-                    {...food, details: itemToAdd.details},
+                    {
+                      ...food,
+                      details: itemToAdd.details,
+                      serving_description_id: itemToAdd.serving_description_id,
+                    },
                   ]);
                 }
               }
@@ -1414,9 +1416,7 @@ const MealContextProvider: React.FC = ({children}) => {
   };
 
   const addDinnerItem = (food: any, details: any) => {
-    const existingIndex = dinnerItems.findIndex(
-      (item) => item.id === food.id,
-    );
+    const existingIndex = dinnerItems.findIndex((item) => item.id === food.id);
 
     if (existingIndex !== -1) {
       if (food.details && food.details.id !== undefined) {
@@ -1433,8 +1433,10 @@ const MealContextProvider: React.FC = ({children}) => {
         bodyFormData.append('food_id', food.id);
         bodyFormData.append('taken_weight', details.selectedWeight);
         bodyFormData.append('quantity', details.multiplication);
-        bodyFormData.append('serving_desc_id', details.id);
+        // bodyFormData.append('serving_desc_id', details.serving_description_id);
         bodyFormData.append('desc_num_food_tbl', details.id);
+
+        bodyFormData.append('serving_desc_id', details.id);
 
         api({
           method: 'post',
@@ -1475,6 +1477,7 @@ const MealContextProvider: React.FC = ({children}) => {
                     updatedItems[existingIndex] = {
                       ...food,
                       details: itemToAdd.details,
+                      serving_description_id: itemToAdd.serving_description_id,
                     };
                     setDinnerItems(updatedItems);
                   }
@@ -1548,7 +1551,11 @@ const MealContextProvider: React.FC = ({children}) => {
                   // Add the item to breakfastItems
                   setDinnerItems((prevItems) => [
                     ...prevItems,
-                    {...food, details: itemToAdd.details},
+                    {
+                      ...food,
+                      details: itemToAdd.details,
+                      serving_description_id: itemToAdd.serving_description_id,
+                    },
                   ]);
                 }
               }
@@ -1566,7 +1573,6 @@ const MealContextProvider: React.FC = ({children}) => {
     // setTotalCalories(totalCalories + food.calories);
   };
 
- 
   const addMealItem1 = (food: any, details: any) => {
     const existingIndex = mealItems1.findIndex((item) => item.id === food.id);
 
@@ -1577,6 +1583,8 @@ const MealContextProvider: React.FC = ({children}) => {
         console.log(details, 'details id from db to update');
 
         const updatedItems = [...mealItems1];
+       
+      
         updatedItems[existingIndex] = {...food, details};
         // setBreakfastItems(updatedItems);
         var bodyFormData = new FormData();
@@ -1585,8 +1593,10 @@ const MealContextProvider: React.FC = ({children}) => {
         bodyFormData.append('food_id', food.id);
         bodyFormData.append('taken_weight', details.selectedWeight);
         bodyFormData.append('quantity', details.multiplication);
-        bodyFormData.append('serving_desc_id', details.id);
+        // bodyFormData.append('serving_desc_id', details.serving_description_id);
         bodyFormData.append('desc_num_food_tbl', details.id);
+
+        bodyFormData.append('serving_desc_id', details.id);
 
         api({
           method: 'post',
@@ -1627,6 +1637,7 @@ const MealContextProvider: React.FC = ({children}) => {
                     updatedItems[existingIndex] = {
                       ...food,
                       details: itemToAdd.details,
+                      serving_description_id: itemToAdd.serving_description_id,
                     };
                     setMealItems1(updatedItems);
                   }
@@ -1702,7 +1713,11 @@ const MealContextProvider: React.FC = ({children}) => {
                   // Add the item to breakfastItems
                   setMealItems1((prevItems) => [
                     ...prevItems,
-                    {...food, details: itemToAdd.details},
+                    {
+                      ...food,
+                      details: itemToAdd.details,
+                      serving_description_id: itemToAdd.serving_description_id,
+                    },
                   ]);
                 }
               }
@@ -1737,8 +1752,10 @@ const MealContextProvider: React.FC = ({children}) => {
         bodyFormData.append('food_id', food.id);
         bodyFormData.append('taken_weight', details.selectedWeight);
         bodyFormData.append('quantity', details.multiplication);
-        bodyFormData.append('serving_desc_id', details.id);
+        // bodyFormData.append('serving_desc_id', details.serving_description_id);
         bodyFormData.append('desc_num_food_tbl', details.id);
+
+        bodyFormData.append('serving_desc_id', details.id);
 
         api({
           method: 'post',
@@ -1779,6 +1796,7 @@ const MealContextProvider: React.FC = ({children}) => {
                     updatedItems[existingIndex] = {
                       ...food,
                       details: itemToAdd.details,
+                      serving_description_id: itemToAdd.serving_description_id,
                     };
                     setMealItems2(updatedItems);
                   }
@@ -1813,7 +1831,6 @@ const MealContextProvider: React.FC = ({children}) => {
       bodyFormData.append('serving_desc_id', details.serving_desc_id);
       bodyFormData.append('desc', details.desc);
       bodyFormData.append('added_date', details.added_date);
-
       api({
         method: 'post',
         url: `add_diet_data`,
@@ -1854,7 +1871,11 @@ const MealContextProvider: React.FC = ({children}) => {
                   // Add the item to breakfastItems
                   setMealItems2((prevItems) => [
                     ...prevItems,
-                    {...food, details: itemToAdd.details},
+                    {
+                      ...food,
+                      details: itemToAdd.details,
+                      serving_description_id: itemToAdd.serving_description_id,
+                    },
                   ]);
                 }
               }
@@ -1871,7 +1892,7 @@ const MealContextProvider: React.FC = ({children}) => {
     }
     // setTotalCalories(totalCalories + food.calories);
   };
-  const addWater =(plus)=>{
+  const addWater = (plus) => {
     // console.log(food, 'water data');
     // var bodyFormData = new FormData();
     // bodyFormData.append('customer_id', details.customer_id);
@@ -1881,38 +1902,30 @@ const MealContextProvider: React.FC = ({children}) => {
       url: `update_water_tracker/${customerId}/${plus}`,
       // data: bodyFormData,
       // headers: {'Content-Type': 'multipart/form-data'},
-    }).then(function (response) {
-      console.log(response.data.data , "set water");
+    })
+      .then(function (response) {
+        console.log(response.data.data, 'set water');
 
-      const currentDate = new Date();
-      const formattedDate = `${currentDate.getFullYear()}-${String(
-        currentDate.getMonth() + 1,
-      ).padStart(2, '0')}-${String(currentDate.getDate()).padStart(
-        2,
-        '0',
-      )}`;
+        const currentDate = new Date();
+        const formattedDate = `${currentDate.getFullYear()}-${String(
+          currentDate.getMonth() + 1,
+        ).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
 
-      const apiUrl = `get_daily_required_calories/${customerId}`;
-      api
-      .get(apiUrl)
-      .then((response) => {
-        const responseData = response.data;
-        console.log(responseData.data,"track data");
+        const apiUrl = `get_daily_required_calories/${customerId}`;
+        api.get(apiUrl).then((response) => {
+          const responseData = response.data;
+          console.log(responseData.data, 'track data');
 
-        setWater(responseData.data.water_datas);
-      }
-       
-        
-        )
+          setWater(responseData.data.water_datas);
+        });
 
-      // setWater(response.data.data)
-      
-    }).catch(function (error) {
-      // Handle error when fetching data from the API
-      console.error('Error fetching data from the API:', error);
-    });
-
-  }
+        // setWater(response.data.data)
+      })
+      .catch(function (error) {
+        // Handle error when fetching data from the API
+        console.error('Error fetching data from the API:', error);
+      });
+  };
   const deleteItem = (items: any[], mealType: string) => {
     switch (mealType) {
       case 'breakfast':
@@ -1983,8 +1996,7 @@ const MealContextProvider: React.FC = ({children}) => {
     clearContextData,
     deleteItem,
     updateBreakfastItem,
-    isLoading
-    
+    isLoading,
   };
 
   return <MealContext.Provider value={value}>{children}</MealContext.Provider>;

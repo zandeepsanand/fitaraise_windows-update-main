@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import React, {useContext, useEffect, useState} from 'react';
-import {BASE_URL} from '@env';
 import {useTheme, useTranslation} from '../../hooks';
 import {Block, Button, Image, Input, Text} from '../../components/';
+
 import {
   Platform,
   TouchableWithoutFeedback,
@@ -37,16 +37,16 @@ const FoodPage = ({route, navigation}) => {
     morningSnackItems,
     addBreakfastItem,
   } = useContext(MealContext);
-  console.log(breakfastItems, 'first one');
+
   const {data, formDataCopy} = route.params;
-  // console.log(formDataCopy);
+
   const [initialGram, setInitialGram] = useState(0);
   const [selectedWeight, setSelectedWeight] = useState(initialGram);
   useEffect(() => {
     setSelectedWeight(initialGram);
   }, [initialGram]);
 
-  const [selectedFood, setSelectedFood] = useState({});
+
   const [servingGrams, setServingGrams] = useState([]);
   const [servingDetails, setServingDetails] = useState([]);
   const [servingDetailsFull, setServingDetailsFull] = useState([]);
@@ -92,7 +92,7 @@ const FoodPage = ({route, navigation}) => {
   const [totalCalcium, setTotalCalcium] = useState(0);
   const [totalIron, setTotalIron] = useState(0);
   const {mealType, meal_type} = route.params;
-  const [foodItems, setFoodItems] = useState([]);
+ 
   const [editItemId, setEditItemId] = useState(null);
   const [editItemName, setEditItemName] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -102,20 +102,17 @@ const FoodPage = ({route, navigation}) => {
     setEditItemName(itemId.id);
   };
 
-  const [isEditFormVisible, setIsEditFormVisible] = useState(false);
+ 
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(null);
 
   const {assets, colors, gradients, sizes, fonts, user} = useTheme();
-  const [selectedValue, setSelectedValue] = useState(245);
-  const [count, setCount] = useState(1);
+
+
   const [gramCount, setGramCount] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
   const [textInputValue, setTextInputValue] = useState('');
-  const handleValueChange = (value) => {
-    setSelectedValue(value);
-    setTextInputValue(`You selected ${value}`);
-  };
+
   const [foodData, setFoodData] = useState();
   const {t} = useTranslation();
   const [isFullBlock, setIsFullBlock] = useState(false);
@@ -127,72 +124,48 @@ const FoodPage = ({route, navigation}) => {
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
   };
-  const IMAGE_SIZE = (sizes.width - (sizes.padding + sizes.sm) * 2) / 3;
-  const IMAGE_VERTICAL_SIZE =
-    (sizes.width - (sizes.padding + sizes.sm) * 2) / 2;
-  const IMAGE_MARGIN = (sizes.width - IMAGE_SIZE * 3 - sizes.padding * 2) / 2;
-  const IMAGE_VERTICAL_MARGIN =
-    (sizes.width - (IMAGE_VERTICAL_SIZE + sizes.sm) * 2) / 2;
-
   console.log('id', id);
+  const [isLoadingServingGrams, setIsLoadingServingGrams] = useState(false);
+
   const debouncedHandleEdit = _.debounce(handleEdit, 500);
 
   const toggleEdit = (item) => {
-    setIsEditMode(true); // Set isEditMode to true to hide the touch icon and show the block
+    setIsEditMode(true);
     debouncedHandleEdit.cancel();
     debouncedHandleEdit(item);
   };
 
-  const [isLoadingServingGrams, setIsLoadingServingGrams] = useState(false);
 
-  function handleEdit(item) {
-    setIsEditMode(true);
-    setIsLoadingServingGrams(true);
-    api
-      .get(`get_serving_desc_by_food_id/${item.id}`)
-      .then((response) => {
-        console.log(response.data.data, 'the food details');
-
-        setServingDetailsFull(response.data.data.serving_desc);
-        const servingNames = response.data.data.serving_desc.map(
-          (serving) => serving.name,
-        );
-        const servingId = response.data.data.serving_desc.map(
-          (serving) => serving.id,
-        );
-        servingId.unshift(4792);
-        const servingInitialGram = response.data.data.serving_desc.map(
-          (serving) => serving.weight,
-        );
-        const servingGrams = response.data.data.serving_desc.map(
-          (serving) => `${serving.name} (${serving.weight} g)`,
-        );
-        setInitialGram(item.details.selectedWeight);
-        servingInitialGram.unshift(initialGram);
-        setServingId(servingId[0]);
-        setServingDetails(servingNames);
-        nutritionCalculation(item);
-        setServingGrams(servingGrams);
-
-        servingGrams.unshift(`${item.details.selectedWeight} g`);
-        setSelectedDropDown(item.details.selectedDropDown);
-        setIsLoadingServingGrams(false);
-      })
-      .catch((error) => {
-        console.error(error);
-        setIsEditMode(false);
-      });
+  async function handleEdit(item) {
+    try {
+      setIsEditMode(true);
+      setIsLoadingServingGrams(true);
+  
+      const response = await api.get(`get_serving_desc_by_food_id/${item.id}`);
+      const servingDesc = response.data.data.serving_desc;
+  
+      // Update state once with all necessary changes
+      const servingId = [4792, ...servingDesc.map((serving) => serving.id)];
+      const servingInitialGram = [item.details.selectedWeight, ...servingDesc.map((serving) => serving.weight)];
+      const servingGrams = [
+        `${item.details.selectedWeight} g`,
+        ...servingDesc.map((serving) => `${serving.name} (${serving.weight} g)`),
+      ];
+  
+      setServingDetailsFull(servingDesc);
+      setInitialGram(item.details.selectedWeight);
+      setServingId(servingId[0]);
+      setServingDetails(servingDesc.map((serving) => serving.name));
+      nutritionCalculation(item);
+      setServingGrams(servingGrams);
+      setSelectedDropDown(item.details.selectedDropDown);
+  
+      setIsLoadingServingGrams(false);
+    } catch (error) {
+      console.error(error);
+      setIsEditMode(false);
+    }
   }
-  function handleEdit4792(item) {}
-
-  // Define another function to be executed if food_id is available
-  function anotherFunction(foodData) {
-    // Your code to handle foodData goes here
-    console.log('Executing anotherFunction with foodData:', foodData);
-  }
-
-  // Replace the code inside anotherFunction with your specific logic for handling foodData
-
   function nutritionCalculation(item, selectedWeight1) {
     // without selecting the dropdown menu for calculation
     if (selectedWeight1 === undefined) {
@@ -734,7 +707,7 @@ const FoodPage = ({route, navigation}) => {
                               }}
                               onChangeText={(value) => {
                                 {
-                                  // setCount(value);
+                                
                                   handleGramChange(value);
                                 }
                               }}
@@ -840,7 +813,9 @@ const FoodPage = ({route, navigation}) => {
 
                                     handleAddFood(item);
                                   }}>
-                                  <Text bold>Update</Text>
+                                  <Text bold primary>
+                                    Update
+                                  </Text>
                                 </TouchableWithoutFeedback>
                               )}
                             </Block>
@@ -849,30 +824,24 @@ const FoodPage = ({route, navigation}) => {
                       </>
                     ) : (
                       <Block>
-                        {
-                                  item.serving_description_id === 4792
-                                    ? (
-                                      <Block flex={3}>
-                                     
-                                      </Block>
-                                    ):(
-                                      <Block style={styles.row} flex={0}>
-                                      <Block flex={0}>
-                                        <Text paddingRight={10} semibold>
-                                          Quantity
-                                        </Text>
-                                      </Block>
-                                      <Block flex={3}>
-                                        <Text center semibold>
-                                          Selected serving size
-                                        </Text>
-                                      </Block>
-                                      <Block flex={0} width={40}></Block>
-                                    </Block>
-                                    )
-                                    
-                                }
-                      
+                        {item.serving_description_id === 4792 ? (
+                          <Block flex={3}></Block>
+                        ) : (
+                          <Block style={styles.row} flex={0}>
+                            <Block flex={0}>
+                              <Text paddingRight={10} semibold >
+                                Quantity
+                              </Text>
+                            </Block>
+                            <Block flex={3}>
+                              <Text center semibold>
+                                Selected serving size
+                              </Text>
+                            </Block>
+                            <Block flex={0} width={40}></Block>
+                          </Block>
+                        )}
+
                         {isLoading ? (
                           <ActivityIndicator size="large" color="green" />
                         ) : (
@@ -883,8 +852,8 @@ const FoodPage = ({route, navigation}) => {
                                 flex={0}
                                 paddingTop={10}>
                                 <Block flex={0} width={65} center>
-                                  <Text paddingRight={10} center>
-                                    Selected Weight
+                                  <Text paddingRight={10} center bold primary>
+                                    Total Weight
                                   </Text>
                                 </Block>
                                 {isEditMode &&
@@ -895,11 +864,13 @@ const FoodPage = ({route, navigation}) => {
                                   </Block>
                                 ) : (
                                   <Block flex={3} center>
-                                    <Text center> {
-                                  item.serving_description_id === 4792
-                                    ? item.details.taken_weight
-                                    : item.details.selectedDropDown
-                                } gm</Text>
+                                    <Text center primary bold>
+                                      {' '}
+                                      {item.serving_description_id === 4792
+                                        ? item.details.taken_weight
+                                        : item.details.selectedDropDown}{' '}
+                                      gm
+                                    </Text>
                                   </Block>
                                 )}
 
@@ -929,18 +900,16 @@ const FoodPage = ({route, navigation}) => {
                                 flex={0}
                                 paddingTop={10}>
                                 <Block flex={0} width={65} center>
-                                  <Text paddingRight={10} center>
+                                  <Text paddingRight={10} center bold primary>
                                     {item.details.multiplication}
                                   </Text>
                                 </Block>
 
                                 <Block flex={3} center>
-                                  <Text center>
-                                  {
-                                  item.serving_description_id === 4792
-                                    ? item.details.taken_weight
-                                    : item.details.selectedDropDown
-                                }
+                                  <Text center bold primary>
+                                    {item.serving_description_id === 4792
+                                      ? item.details.taken_weight
+                                      : item.details.selectedDropDown}
                                   </Text>
                                 </Block>
                                 <TouchableWithoutFeedback
@@ -1000,9 +969,9 @@ const FoodPage = ({route, navigation}) => {
                         }}>
                         <Block padding={10} align="center">
                           {expanded && selectedItemId === item.details.id ? (
-                            <Text>Hide</Text>
+                            <Text bold>Hide</Text>
                           ) : (
-                            <Text>Full Details </Text>
+                            <Text bold>Full Details </Text>
                           )}
                         </Block>
                       </TouchableWithoutFeedback>

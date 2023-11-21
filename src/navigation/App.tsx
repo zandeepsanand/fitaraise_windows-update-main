@@ -386,32 +386,34 @@ export default () => {
               <Stack.Screen
                 name="morngSnack"
                 component={MorningSnackSingle}
-                options={{title: 'Nutrition', headerTitleAlign: 'left'}}
+                options={{
+                  headerShown: false,
+                }}
               />
               <Stack.Screen
                 name="lunch"
                 component={LunchSingle}
-                options={{title: 'Nutrition', headerTitleAlign: 'center'}}
+                options={{headerShown: false}}
               />
               <Stack.Screen
                 name="evening"
                 component={EveningSingle}
-                options={{title: 'Nutrition', headerTitleAlign: 'center'}}
+                options={{headerShown: false}}
               />
               <Stack.Screen
                 name="dinner"
                 component={DinnerSingle}
-                options={{title: 'Nutrition', headerTitleAlign: 'center'}}
+                options={{headerShown: false}}
               />
               <Stack.Screen
                 name="meal1"
                 component={Meal1Single}
-                options={{title: 'Nutrition', headerTitleAlign: 'center'}}
+                options={{headerShown: false}}
               />
               <Stack.Screen
                 name="meal2"
                 component={Meal2Single}
-                options={{title: 'Nutrition', headerTitleAlign: 'center'}}
+                options={{headerShown: false}}
               />
               <Stack.Screen
                 name="unlockDiet"
