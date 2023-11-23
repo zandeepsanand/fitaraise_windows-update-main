@@ -636,7 +636,8 @@ const Meal2Single = ({route, navigation}) => {
                         color={'#fa9579'}
                         style={
                           (styles.data,
-                          {width: 20, height: 20, alignContent: 'center'})
+                          {width: 20, height: 20, alignContent: 'center'}
+                          )
                         }
                         //  marginTop={sizes.s}
                       />

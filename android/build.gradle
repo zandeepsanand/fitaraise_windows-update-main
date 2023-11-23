@@ -40,15 +40,20 @@ allprojects {
 
     afterEvaluate {
         subprojects {
-           android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        // Other configurations...
-    }
-    // Other configurations...
-}
+            project.plugins.all {
+                if (it instanceof com.android.build.gradle.BasePlugin) {
+                    android {
+                        compileSdkVersion rootProject.ext.compileSdkVersion
+                        defaultConfig {
+                            minSdkVersion rootProject.ext.minSdkVersion
+                            targetSdkVersion rootProject.ext.targetSdkVersion
+                            // Other configurations...
+                        }
+                        // Other configurations...
+                    }
+                }
+            }
         }
     }
 }
+
